@@ -29,6 +29,7 @@ int main(int argc, char * argv[]) {
 
     bool PAM = true;
     bool STRIP = false;
+    bool N   = true;
     
     uint32_t edit_distance;
     uint32_t num_patterns;
@@ -95,7 +96,8 @@ int main(int argc, char * argv[]) {
                        line,
                        edit_distance,
                        STRIP, // dont trim
-		       PAM); // always dont trim
+		               PAM,
+                       N); // always dont trim
         id++;
     }
 

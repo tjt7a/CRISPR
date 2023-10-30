@@ -8,5 +8,7 @@ void genLevenshtein(Automata *a,
                     std::string pattern,
                     uint32_t edit_distance,
                     bool restricted,
-		    bool pam);
+		            bool pam,
+                    bool N);
 #endif
+ 

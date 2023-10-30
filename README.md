@@ -1,6 +1,11 @@
 # CRISPR
 Automata Code for CRISPR
 
+We use the VASim CPU simulator to simulate automata. To install and run VASim:
+
+1. Go to lib/VASim and run 'make'
+2. Run ./vasim
+
 To run the experiment, run the ./run_experiment.sh shell
 ./run_experiment.sh
 

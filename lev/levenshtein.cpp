@@ -30,7 +30,8 @@ void genSTEs(Automata *a,
              string pattern_id_s,
              string pattern,
              uint32_t edit_distance,
-	     bool pam) {
+	        bool pam,
+            bool N) {
 
     // All elements are encoded in the following way
     // <pattern_id>_<type>_<column>_<row>
@@ -46,7 +47,8 @@ void genSTEs(Automata *a,
             string id = pattern_id_s + "_" + type + "_" + to_string(col) + "_" + to_string(row);
             //cout << "Creating STE: " + id << endl;
             //cout << pattern.substr(col - 1, 1) << endl;
-            STE* ste = new STE(id, pattern.substr(col - 1, 1), "none");
+            string temp_pattern = (N) ? pattern.substr(col - 1, 1) : "N" + pattern.substr(col - 1, 1);
+            STE* ste = new STE(id, temp_pattern, "none");
 
             // when am I a start state?
             // on the diagonal
@@ -57,22 +59,21 @@ void genSTEs(Automata *a,
             // when am I a report state?
             // if we are in the lower right corner
             if( (col + (edit_distance-row)) >= pattern.size() ){
-		    if(pam){
-			string id_pam_0 = pattern_id_s + "_" + "PAM" + "_" + '0';
-    			STE *pam_0_ste = static_cast<STE*>(a->getElement(id_pam_0));
-			a->rawAddSTE(ste);
-			a->addEdge(ste, pam_0_ste);
-		    }else{
-                	ste->setReporting(true);
-			a->rawAddSTE(ste);
-		    }
-	    }
-	    else{
-		    a->rawAddSTE(ste);
-        
-	    }
+                if(pam){
+                    string id_pam_0 = pattern_id_s + "_" + "PAM" + "_" + '0';
+                    STE *pam_0_ste = static_cast<STE*>(a->getElement(id_pam_0));
+                    a->rawAddSTE(ste);
+                    a->addEdge(ste, pam_0_ste);
+                }else{
+                    ste->setReporting(true);
+                    a->rawAddSTE(ste);
+                }
+	        }
+            else{
+                a->rawAddSTE(ste);
+            }
     
-	}
+	    }
     }
 
     // Add all elements for mismatches (insertions, deletions, substitutions)
@@ -421,7 +422,8 @@ void genLevenshtein(Automata *a,
                     string pattern,
                     uint32_t edit_distance,
                     bool restricted,
-		    bool pam) {
+		            bool pam,
+                    bool N) {
 
     string pattern_id_s = to_string(pattern_id);
     
@@ -429,7 +431,7 @@ void genLevenshtein(Automata *a,
     	addPAMSTEs(a, pattern_id_s);
     }
 
-    genSTEs(a, pattern_id_s, pattern, edit_distance, pam);
+    genSTEs(a, pattern_id_s, pattern, edit_distance, pam, N);
     connectSTEs(a, pattern_id_s, pattern, edit_distance);
 
     //
