@@ -91,10 +91,11 @@ We generated each levenshtein automaton from the gRNA sequence with or without P
 
 6. Compile the resulting Levenshtein + PAM automaton into a Hyperscan database with hscompile
 	```
-	hscompile lev_1_4_sgRNA_with_PAM.mnrl lev_1_4_sgRNA_with_PAM.hs
+	./lib/hscompile/build/hscompile sgRNA_PAM.mnrl sgRNA_PAM.hs
 	```
 
 7. Run the database against the forward-strand genome:
 	```
-	hsrun lev_1_4_sgRNA_with_PAM.hs 
+ 	gunzip genomes/forward/forward_hg38_no_n.txt.gz
+	./lib/hscompile/build/hsrun sgRNA_PAM.hs genomes/forward/forward_hg38_no_n.txt
 	```
