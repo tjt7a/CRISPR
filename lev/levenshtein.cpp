@@ -45,7 +45,7 @@ void genSTEs(Automata *a,
             string id = pattern_id_s + "_" + type + "_" + to_string(col) + "_" + to_string(row);
             //cout << "Creating STE: " + id << endl;
             //cout << pattern.substr(col - 1, 1) << endl;
-            string temp_pattern = (N) ? pattern.substr(col - 1, 1) : "N" + pattern.substr(col - 1, 1);
+            string temp_pattern = (N) ? "N" + pattern.substr(col - 1, 1) : pattern.substr(col - 1, 1);
             STE* ste = new STE(id, temp_pattern, "none");
 
             // when am I a start state?
@@ -114,8 +114,8 @@ void addMatchRule(Automata *a,
         STE *to = getSTE(a, pattern_id_s, "match", col + 1, row);
         //cout << "TO: " << to->getId() << endl;
         assert(from != 0);
-	assert(to != 0);
-	a->addEdge(from, to);
+	    assert(to != 0);
+	    a->addEdge(from, to);
     }
 }
 
@@ -438,4 +438,3 @@ void genLevenshtein(Automata *a,
     // finalize
     a->finalizeAutomata();
 }
-
