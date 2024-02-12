@@ -56,21 +56,21 @@ We generated each levenshtein automaton from the gRNA sequence with or without P
 	dot -Tpng -o sgRNA_PAM.png automata_0.dot
 	```
 
-	[<p align="center"><img src="./levenshtein/with_pam/sgRNA_PAM.png="600" ></p>](#with_pam_dot)
+	[<p align="center"><img src="./levenshtein/with_pam/sgRNA_PAM.png" width="600" ></p>](#with_pam_dot)
 
 
-4. Translate ANML automata into MNRL automata to work with hscompile:
+5. Translate ANML automata into MNRL automata to work with hscompile:
 	```
 	./lib/VASim/vasim -m sgRNA_PAM.anml
 	mv automata_0.mnrl sgRNA_PAM.mnrl
 	```
 
-5. Compile the resulting Levenshtein + PAM automaton into a Hyperscan database with hscompile
+6. Compile the resulting Levenshtein + PAM automaton into a Hyperscan database with hscompile
 	```
 	hscompile lev_1_4_sgRNA_with_PAM.mnrl lev_1_4_sgRNA_with_PAM.hs
 	```
 
-6. Run the database against the forward-strand genome:
+7. Run the database against the forward-strand genome:
 	```
 	hsrun lev_1_4_sgRNA_with_PAM.hs 
 	```
