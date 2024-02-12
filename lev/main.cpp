@@ -9,7 +9,7 @@ using namespace std;
 */
 void usage() {
 
-    cout << "./lev -d <distance> -f <sequence file>" << endl;
+    cout << "./lev -d <distance> -f <sequence file> optional: -p" << endl;
     
 }
 
@@ -20,22 +20,22 @@ int main(int argc, char * argv[]) {
 
 
     cout << "**************************" << endl;
-    cout << "       Leveshtein        " << endl;
+    cout << "       Levenshtein        " << endl;
     cout << "   Automata Generator" << endl;
     cout << "     by Jack Wadden" << endl;
     cout << "   modified by Tom Tracy  " << endl;
     cout << "     for CRISPR + PAM     " << endl;
     cout << "**************************" << endl;
 
-    bool PAM = true;
+    bool PAM = false;
     bool STRIP = false;
-    bool N   = true;
+    bool N   = false;
     
     uint32_t edit_distance;
     uint32_t num_patterns;
     string source_fn;
 
-    if(argc != 5) {
+    if(argc != 5 && argc != 6) {
         usage();
         exit(1);
     }else{
@@ -59,7 +59,12 @@ int main(int argc, char * argv[]) {
                     usage();
                     exit(1);
                 }
-            }else{
+            }else if(flag.compare("-p") == 0) {
+                i++;
+                PAM = true;
+            }
+            
+            else {
                 usage();
                 exit(1);
             }
@@ -90,23 +95,34 @@ int main(int argc, char * argv[]) {
         }
         cout << "Building filter for: " << line << endl;
 
-        //
+        // Generates the Levenshtein Automaton
         genLevenshtein(&a,
                        id,
                        line,
                        edit_distance,
                        STRIP, // dont trim
 		               PAM,
-                       N); // always dont trim
+                       N); // Allow for 'N' symbols
         id++;
     }
+
+    // What is the difference between STRIP and N?
 
     // emit ANML file
     string out_fn = "lev_" +
         to_string(id) + "_" +
-        to_string(edit_distance) +
-        ".anml";
+        to_string(edit_distance);
+    
+    // Add to filename if PAM or STRIP
+    if(PAM){
+        out_fn += "_PAM";
+    }
+    
+    if(STRIP){
+        out_fn += "_STRIP";
+    }
+        
+    out_fn += ".anml";
 
     a.automataToANMLFile(out_fn);
 }
-
