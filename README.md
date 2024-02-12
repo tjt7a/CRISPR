@@ -3,11 +3,35 @@ Levenshtein Generator for CRISPR-Cas9
 
 CRISPR-Cas9 recognizes DNA subsequences that are complementary to a short RNA sequence. In order for CAS9 to work, it requires a special Protospacer Adjacent Motif (PAM). In the case of our work, our PAM is NGG.
 
+To Clone:
+```
+	git clone --recurse-submodules https://github.com/tjt7a/CRISPR
+
+```
+
 We use the VASim CPU simulator to build and simulate automata. To install and run VASim:
 
 Go to lib/VASim and run 'make'
 ```
 	cd ./lib/VASim
+	make
+```
+
+We also use HScompile to run automata with Hyperscan. To install and build Hyperscan:
+Go to lib/hscompile:
+```
+	cd ./lib/hscompile/lib/hyperscan
+	mkdir build
+	cd build
+	cmake ..
+	make
+
+	cd ./lib/hscompile/lib/mnrl/C++
+	make
+
+	mkdir build
+	cd build
+	cmake -DHS_SOURCE_DIR=../lib/hyperscan -DMNRL_SOURCE_DIR=../lib/mnrl/C++ ..
 	make
 ```
 
