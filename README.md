@@ -42,7 +42,7 @@ We generated each levenshtein automaton from the gRNA sequence with or without P
 	./lib/VASim/vasim -d sgRNA_without_PAM.anml
 	dot -Tpng -o sgRNA_without_PAM.png automata_0.dot
 	```
-	[<p align="center"><img src="./levenshtein/without_pam/sgRNA_without_PAM.png" width="300" ></p>](#without_pam_dot)
+	[<p align="center"><img src="./levenshtein/without_pam/sgRNA_without_PAM.png" width="600" ></p>](#without_pam_dot)
 
 
 3. Generate a Levenshtein automaton from the sequence with PAM by making all reporting states point to the first base in the PAM (N), and making the last G report
@@ -56,7 +56,7 @@ We generated each levenshtein automaton from the gRNA sequence with or without P
 	dot -Tpng -o sgRNA_PAM.png automata_0.dot
 	```
 
-	[<p align="center"><img src="./levenshtein/with_pam/sgRNA_PAM.png width="300" ></p>](#with_pam_dot)
+	[<p align="center"><img src="./levenshtein/with_pam/sgRNA_PAM.png="600" ></p>](#with_pam_dot)
 
 
 4. Translate ANML automata into MNRL automata to work with hscompile:
