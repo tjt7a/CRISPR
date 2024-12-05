@@ -29,7 +29,8 @@ void genSTEs(Automata *a,
              string pattern_id_s,
              string pattern,
              uint32_t edit_distance,
-             bool N) {
+             bool N,
+             bool REPLACE) {
 
     // All elements are encoded in the following way
     // <pattern_id>_<type>_<column>_<row>
@@ -46,6 +47,12 @@ void genSTEs(Automata *a,
             //cout << "Creating STE: " + id << endl;
             //cout << pattern.substr(col - 1, 1) << endl;
             string temp_pattern = (N) ? "N" + pattern.substr(col - 1, 1) : pattern.substr(col - 1, 1);
+
+            if(REPLACE && temp_pattern == "N"){
+                cout << "*Found an N, replacing with ACGT!" << endl;
+                temp_pattern = "ACGT";
+            }
+
             STE* ste = new STE(id, temp_pattern, "none");
 
             // when am I a start state?
@@ -418,11 +425,12 @@ void genLevenshtein(Automata *a,
                     uint32_t edit_distance,
                     bool restricted,
 		            bool pam,
-                    bool N) {
+                    bool N,
+                    bool REPLACE) {
 
     string pattern_id_s = to_string(pattern_id);
 
-    genSTEs(a, pattern_id_s, pattern, edit_distance, N);
+    genSTEs(a, pattern_id_s, pattern, edit_distance, N, REPLACE);
     connectSTEs(a, pattern_id_s, pattern, edit_distance);
 
     //

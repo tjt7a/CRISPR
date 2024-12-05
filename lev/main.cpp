@@ -15,6 +15,7 @@ void usage() {
     cout << "-p                 | Includes the PAM at the end of the CAS9 sequence" << endl;
     cout << "-n                 | Include 'N' in the alphabet" << endl;
     cout << "-s                 | Strip Levenshtein diagonals to reduce number of states" << endl;
+    cout << "-r                 | Replace Ns with ACGT" << endl;
 }
 
 /**
@@ -34,6 +35,7 @@ int main(int argc, char * argv[]) {
     bool PAM = false;   // This variable sets the final 3 states to the PAM "NGG"
     bool N   = false;   // Accept N states
     bool STRIP = false; // Strip the Levenshtein to the minimum number of states
+    bool REPLACE = false; // Replace N states in the pattern with ACGT -- this allows us to include the PAM in the edit distance
     
     uint32_t edit_distance = -1;
     string source_fn = "";
@@ -71,6 +73,9 @@ int main(int argc, char * argv[]) {
             }else if(flag.compare("-s") == 0) {
                 i++;
                 STRIP = true;
+            }else if(flag.compare("-r") == 0) {
+                i++;
+                REPLACE = true;
             }else{
                 usage();
                 exit(1);
@@ -81,6 +86,12 @@ int main(int argc, char * argv[]) {
     // If the required arguments are not provided ...
     if(edit_distance == -1 || source_fn == "") {
         usage();
+        exit(1);
+    }
+
+    // If both the N and the REPLACE flag are enabled, this is an error ...
+    if(N && REPLACE){
+        cout << "ERROR: Cannot accept Ns and replace Ns; use either -n or -r" << endl;
         exit(1);
     }
 
@@ -95,6 +106,8 @@ int main(int argc, char * argv[]) {
         cout << "\tIncluding 'N' in alphabet..." << endl;
     if(STRIP)
         cout << "\tStripping diagonals off Levenshtein automaton..." << endl;
+    if(REPLACE)
+        cout << "\tReplacing Ns in the pattern with [ACGT]" << endl;
 
     // Initialize automata
     Automata a;
@@ -112,7 +125,7 @@ int main(int argc, char * argv[]) {
         if(line.empty()){
             continue;
         }
-        cout << "Building filter for: " << line << endl;
+        cout << "Building Levenshtein Automaton for: " << line << endl;
 
         // Generates the Levenshtein Automaton
         genLevenshtein(&a,
@@ -121,8 +134,9 @@ int main(int argc, char * argv[]) {
         	edit_distance,
         	STRIP, // dont trim
 		    PAM,
-        	N
-	    ); // Allow for 'N' symbols
+        	N,
+            REPLACE
+	    );
         id++;
     }
 
@@ -140,11 +154,15 @@ int main(int argc, char * argv[]) {
     }
 
     if(N){
-	out_fn += "_N";	
+	    out_fn += "_N";	
     }
     
     if(STRIP){
         out_fn += "_STRIP";
+    }
+
+    if(REPLACE){
+        out_fn += "_REPLACE";
     }
         
     out_fn += ".anml";

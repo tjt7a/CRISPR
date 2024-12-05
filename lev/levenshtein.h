@@ -9,6 +9,8 @@ void genLevenshtein(Automata *a,
                     uint32_t edit_distance,
                     bool restricted,
 		            bool pam,
-                    bool N);
+                    bool N,
+                    bool REPLACE
+                    );
 #endif
  
