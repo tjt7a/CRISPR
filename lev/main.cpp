@@ -65,16 +65,12 @@ int main(int argc, char * argv[]) {
                     exit(1);
                 }
             }else if(flag.compare("-p") == 0) {
-                i++;
                 PAM = true;
             }else if(flag.compare("-n") == 0) {
-                i++;
                 N = true;
             }else if(flag.compare("-s") == 0) {
-                i++;
                 STRIP = true;
             }else if(flag.compare("-r") == 0) {
-                i++;
                 REPLACE = true;
             }else{
                 usage();
