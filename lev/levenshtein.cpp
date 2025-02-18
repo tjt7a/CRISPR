@@ -16,12 +16,11 @@ STE *getSTE(Automata *a,
             string type,
             uint32_t col,
             uint32_t row) {
-
+ 
     string id = pattern_id_s + "_" + type + "_" + to_string(col) + "_" + to_string(row);
     STE *ste = static_cast<STE*>(a->getElement(id));
     return ste;
 }
-
 
 /**
  *
@@ -30,7 +29,8 @@ void genSTEs(Automata *a,
              string pattern_id_s,
              string pattern,
              uint32_t edit_distance,
-	     bool pam) {
+             bool N,
+             bool REPLACE) {
 
     // All elements are encoded in the following way
     // <pattern_id>_<type>_<column>_<row>
@@ -46,7 +46,14 @@ void genSTEs(Automata *a,
             string id = pattern_id_s + "_" + type + "_" + to_string(col) + "_" + to_string(row);
             //cout << "Creating STE: " + id << endl;
             //cout << pattern.substr(col - 1, 1) << endl;
-            STE* ste = new STE(id, pattern.substr(col - 1, 1), "none");
+            string temp_pattern = (N) ? "N" + pattern.substr(col - 1, 1) : pattern.substr(col - 1, 1);
+
+            if(REPLACE && temp_pattern == "N"){
+                cout << "*Found an N, replacing with ACGT!" << endl;
+                temp_pattern = "ACGT";
+            }
+
+            STE* ste = new STE(id, temp_pattern, "none");
 
             // when am I a start state?
             // on the diagonal
@@ -57,22 +64,14 @@ void genSTEs(Automata *a,
             // when am I a report state?
             // if we are in the lower right corner
             if( (col + (edit_distance-row)) >= pattern.size() ){
-		    if(pam){
-			string id_pam_0 = pattern_id_s + "_" + "PAM" + "_" + '0';
-    			STE *pam_0_ste = static_cast<STE*>(a->getElement(id_pam_0));
-			a->rawAddSTE(ste);
-			a->addEdge(ste, pam_0_ste);
-		    }else{
-                	ste->setReporting(true);
-			a->rawAddSTE(ste);
-		    }
-	    }
-	    else{
-		    a->rawAddSTE(ste);
-        
-	    }
+                ste->setReporting(true);
+                a->rawAddSTE(ste);
+	        }
+            else{
+                a->rawAddSTE(ste);
+            }
     
-	}
+	    }
     }
 
     // Add all elements for mismatches (insertions, deletions, substitutions)
@@ -95,20 +94,13 @@ void genSTEs(Automata *a,
 
             // when am I a report state?
             // if we are in the lower right corner
-            if( (col + (edit_distance-row)) >= pattern.size() ){
-		    if(pam){
-			string id_pam_0 = pattern_id_s + "_" + "PAM" + "_" + '0';
-    			STE *pam_0_ste = static_cast<STE*>(a->getElement(id_pam_0));
-                        a->rawAddSTE(ste);
-                        a->addEdge(ste, pam_0_ste);
-                    }else{
-                        ste->setReporting(true);
-                        a->rawAddSTE(ste);
-                    }
-	    }
-	    else {
-		a->rawAddSTE(ste);
-	    }
+            if( (col + (edit_distance-row)) >= pattern.size() ){   
+                ste->setReporting(true);
+                a->rawAddSTE(ste);
+	        }
+            else {
+                a->rawAddSTE(ste);
+            }
         }
     }    
 }
@@ -129,8 +121,8 @@ void addMatchRule(Automata *a,
         STE *to = getSTE(a, pattern_id_s, "match", col + 1, row);
         //cout << "TO: " << to->getId() << endl;
         assert(from != 0);
-	assert(to != 0);
-	a->addEdge(from, to);
+	    assert(to != 0);
+	    a->addEdge(from, to);
     }
 }
 
@@ -387,6 +379,9 @@ void clipLevensthein(Automata *a,
 }
 
 void addPAMSTEs(Automata *a, string pattern_id_s) {
+
+    printf("Adding PAM states");
+
 	string type = "PAM";
 
 	// Generate PAM IDs for the STEs
@@ -398,6 +393,14 @@ void addPAMSTEs(Automata *a, string pattern_id_s) {
 	STE* ste_0 = new STE(id_pam_0, "*", "none");
 	STE* ste_1 = new STE(id_pam_1, "G", "none");
 	STE* ste_2 = new STE(id_pam_2, "G", "none");
+
+    // Go through all reporting STEs in graph
+    // add edge from reporting state to start of PAM
+    // disable reporting on non-PAM STE
+    for(Element *report : a->getReports()){
+        a->addEdge(report, ste_0);
+        report->setReporting(false);
+    }
 
 	// Make the final PAM state a reporting state
 	ste_2->setReporting(true);
@@ -421,15 +424,13 @@ void genLevenshtein(Automata *a,
                     string pattern,
                     uint32_t edit_distance,
                     bool restricted,
-		    bool pam) {
+		            bool pam,
+                    bool N,
+                    bool REPLACE) {
 
     string pattern_id_s = to_string(pattern_id);
-    
-    if(pam){
-    	addPAMSTEs(a, pattern_id_s);
-    }
 
-    genSTEs(a, pattern_id_s, pattern, edit_distance, pam);
+    genSTEs(a, pattern_id_s, pattern, edit_distance, N, REPLACE);
     connectSTEs(a, pattern_id_s, pattern, edit_distance);
 
     //
@@ -437,7 +438,11 @@ void genLevenshtein(Automata *a,
         clipLevensthein(a, pattern_id_s, pattern, edit_distance);
     }
 
+    // If PAM, add PAM STEs and connect reporting edges to PAM
+    if(pam){
+    	addPAMSTEs(a, pattern_id_s);
+    }
+    
     // finalize
     a->finalizeAutomata();
 }
-
