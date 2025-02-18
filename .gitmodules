@@ -1,6 +1,3 @@
 [submodule "lib/VASim"]
 	path = lib/VASim
 	url = https://github.com/tjt7a/VASim
-[submodule "lib/hscompile"]
-	path = lib/hscompile
-	url = git@github.com:tjt7a/hscompile.git
