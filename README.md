@@ -5,7 +5,7 @@ CRISPR-Cas9 recognizes DNA subsequences that are complementary to a short RNA se
 
 To Clone:
 ```
-	git clone --recurse-submodules https://github.com/tjt7a/CRISPR
+	git clone -b toms --recurse-submodules https://github.com/tjt7a/CRISPR
 
 ```
 
@@ -20,10 +20,10 @@ Go to lib/VASim and run 'make'
 We also use HScompile to run automata with Hyperscan. To install and build Hyperscan:
 Go to lib/hscompile:
 ```
-	cd ./lib/hscompile/lib/hyperscan
+	cd ./lib/hscompile/lib/hyperscan_for_hscompile
 	mkdir build
 	cd build
-	cmake ..
+	cmake .. -DFAT_RUNTIME=off
 	make
 
 	cd ./lib/hscompile/lib/mnrl/C++
@@ -31,7 +31,7 @@ Go to lib/hscompile:
 
 	mkdir build
 	cd build
-	cmake -DHS_SOURCE_DIR=../lib/hyperscan -DMNRL_SOURCE_DIR=../lib/mnrl/C++ ..
+	cmake -DHS_SOURCE_DIR=../lib/hyperscan_for_hscompile -DMNRL_SOURCE_DIR=../lib/mnrl/C++ ..
 	make
 ```
 
