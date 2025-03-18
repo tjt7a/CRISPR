@@ -1,7 +1,7 @@
 CC=g++
 FLAGS=-O3 --std=c++11 -pthread -DDEBUG=false -g
 VASIM=../lib/VASim
-MNRL=$(VASIM)/libs/mnrl/C++
+MNRL=$(VASIM)/libs/MNRL/C++
 LIBMNRL=$(MNRL)/libmnrl.a
 PUGI=$(VASIM)/libs/pugixml/src
 LIBVASIM=$(VASIM)/libvasim.a
