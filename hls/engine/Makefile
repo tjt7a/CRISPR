@@ -1,6 +1,7 @@
 VPP := $(XILINX_VITIS)/bin/v++
 EMCONFIGUTIL := $(XILINX_VITIS)/bin/emconfigutil
-TARGET:= hw_emu
+TARGET:= hw
+#_emu
 DEVICE:= /opt/xilinx/platforms/xilinx_u280_gen3x16_xdma_1_202211_1/xilinx_u280_gen3x16_xdma_1_202211_1.xpfm 
 
 # kernel targets
@@ -19,7 +20,7 @@ VPP_OPTS += --report_dir ./all_logs/$(TARGET)
 VPP_OPTS += --log_dir ./all_logs/$(TARGET)
 #VPP_LINK_OPTS += --config HBM_connectivity.cfg
 
-CFLAGS := -g -std=c++1y -I$(XILINX_XRT)/include 
+CFLAGS := -g -std=c++1y -I$(XILINX_XRT)/include -I${XILINX_HLS}/include
 LFLAGS := -L$(XILINX_XRT)/lib -lOpenCL -lxrt_coreutil -lrt -luuid
 
 # run time args

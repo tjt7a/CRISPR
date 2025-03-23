@@ -99,8 +99,8 @@ extern "C"
 
 #pragma HLS INTERFACE m_axi depth = 1<<22 port = in offset = slave
 #pragma HLS INTERFACE m_axi depth = 1<<22 port = out offset = slave
-#pragma HLS INTERFACE s_axilite depth = 1 port = num_input bundle = CTRL
-#pragma HLS aggregate variable=out compact=bit
+// #pragma HLS INTERFACE s_axilite depth = 1 port = num_input bundle = CTRL
+// #pragma HLS aggregate variable=out compact=bit
 
 #pragma HLS dataflow
 
