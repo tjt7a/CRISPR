@@ -3,6 +3,8 @@
 
 #include "krnl_automata.hpp"
 
+ap_uint<1> automata(uint8_t input);
+
 ap_uint<1> automata_0(uint8_t input);
 
 #endif

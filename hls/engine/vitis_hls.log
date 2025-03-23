@@ -1,0 +1,69 @@
+
+****** Vitis HLS - High-Level Synthesis from C, C++ and OpenCL v2023.2.1 (64-bit)
+  **** SW Build 4070103 on Dec 13 2023
+  **** IP Build 4080415 on Thu Dec 14 21:01:57 MST 2023
+  **** SharedData Build 4077621 on Mon Dec 11 00:23:44 MST 2023
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source /tools/Xilinx/Vitis_HLS/2023.2/scripts/vitis_hls/hls.tcl -notrace
+INFO: [HLS 200-10] Running '/tools/Xilinx/Vitis_HLS/2023.2/bin/unwrapped/lnx64.o/vitis_hls'
+INFO: [HLS 200-10] For user 'tjt7a' on host 'puma' (Linux_x86_64 version 6.8.0-52-generic) on Sat Mar 22 23:05:42 EDT 2025
+INFO: [HLS 200-10] On os Ubuntu 22.04.5 LTS
+INFO: [HLS 200-10] In directory '/home/tjt7a/src/CRISPR/hls/engine'
+INFO: [HLS 200-2053] The vitis_hls executable is being deprecated. Consider using vitis-run --mode hls --tcl
+Sourcing Tcl script 'run_hls.tcl'
+INFO: [HLS 200-1510] Running: open_project -reset proj_automata 
+INFO: [HLS 200-10] Opening and resetting project '/home/tjt7a/src/CRISPR/hls/engine/proj_automata'.
+INFO: [HLS 200-1510] Running: add_files krnl_automata.cpp 
+INFO: [HLS 200-10] Adding design file 'krnl_automata.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files automata_single_file.cpp 
+INFO: [HLS 200-10] Adding design file 'automata_single_file.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files automata_tree.cpp 
+INFO: [HLS 200-10] Adding design file 'automata_tree.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files -tb krnl_automata_test.cpp 
+INFO: [HLS 200-10] Adding test bench file 'krnl_automata_test.cpp' to the project
+INFO: [HLS 200-1510] Running: set_top krnl_automata 
+INFO: [HLS 200-1510] Running: open_solution -reset solution1 
+INFO: [HLS 200-10] Creating and opening solution '/home/tjt7a/src/CRISPR/hls/engine/proj_automata/solution1'.
+INFO: [HLS 200-10] Cleaning up the solution database.
+INFO: [HLS 200-1505] Using default flow_target 'vivado'
+Resolution: For help on HLS 200-1505 see docs.xilinx.com/access/sources/dita/topic?Doc_Version=2023.2%20English&url=ug1448-hls-guidance&resourceid=200-1505.html
+INFO: [HLS 200-1510] Running: set_part xcu280-fsvh2892-2L-e 
+INFO: [HLS 200-1611] Setting target device to 'xcu280-fsvh2892-2L-e'
+INFO: [HLS 200-1510] Running: create_clock -period 1.25 
+INFO: [SYN 201-201] Setting up clock 'default' with a period of 1.25ns.
+INFO: [HLS 200-1510] Running: csim_design 
+INFO: [SIM 211-2] *************** CSIM start ***************
+INFO: [SIM 211-4] CSIM will launch GCC as the compiler.
+INFO: [HLS 200-2036] Building debug C Simulation binaries
+   Compiling ../../../../krnl_automata_test.cpp in debug mode
+   Compiling ../../../../automata_tree.cpp in debug mode
+   Compiling ../../../../automata_single_file.cpp in debug mode
+   Compiling ../../../../krnl_automata.cpp in debug mode
+   Generating csim.exe
+Input file size: 248956423
+Reading in 4194304 bytes of the file
+Running Kernel
+Done with Kernel
+Reading in 4194304 bytes of the file
+Running Kernel
+Done with Kernel
+0: rid+1:1 pos:2125954
+1: rid+1:1 pos:2333532
+2: rid+1:1 pos:2560041
+3: rid+1:1 pos:2560042
+4: rid+1:1 pos:4020032
+5: rid+1:1 pos:4020033
+6: rid+1:1 pos:4503614
+7: rid+1:1 pos:4898646
+8: rid+1:1 pos:6474433
+9: rid+1:1 pos:8335203
+10: rid+1:1 pos:8335204
+Test passed.
+INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 4194304
+INFO: [SIM 211-1] CSim done with 0 errors.
+INFO: [SIM 211-3] *************** CSIM finish ***************
+INFO: [HLS 200-111] Finished Command csim_design CPU user time: 92.34 seconds. CPU system time: 0.73 seconds. Elapsed time: 93.08 seconds; current allocated memory: 0.000 MB.
+INFO: [HLS 200-112] Total CPU user time: 93.25 seconds. Total CPU system time: 0.93 seconds. Total elapsed time: 94.02 seconds; peak allocated memory: 232.371 MB.
+INFO: [Common 17-206] Exiting vitis_hls at Sat Mar 22 23:07:15 2025...
