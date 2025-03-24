@@ -17,21 +17,20 @@
 #include "krnl_automata.hpp"
 
 // Read Data from Global Memory and write into Stream inStream
-static void read_input(Input *in, hls::stream<UBYTE> &inStream, int num_input)
+static void read_input(Input *in, hls::stream<Symbol> &inStream, int num_input)
 {
+    Symbol symbol;
 // Auto-pipeline is going to apply pipeline to this loop
-mem_rd:
     for (int i = 0; i < num_input; i++)
     {
-#pragma HLS LOOP_TRIPCOUNT min = size max = size
 
         Input temp = in[i];
         for (int j = 0; j < 4; j++)
         {
-#pragma HLS LOOP_TRIPCOUNT min = 4 max = 4
 #pragma HLS pipeline II = 1
+            symbol.symbol = temp.symbols[j];
+	    symbol.last = ((i == (num_input - 1)) && j == 3) ? 1 : 0;
 
-            UBYTE symbol = temp.symbols[j];
             // Blocking write command to inStream
             inStream << symbol;
         }
@@ -39,47 +38,59 @@ mem_rd:
 }
 
 // Read Input data from inStream and write the result into outStream
-static void compute_automata(hls::stream<UBYTE> &inStream,
-                             hls::stream<Match> &outStream,
-                             int num_input)
+static void compute_automata(hls::stream<Symbol> &inStream,
+                             hls::stream<Match> &outStream)
 {
 // Auto-pipeline is going to apply pipeline to this loop
-execute:
-    for (ap_uint<30> counter = 0; counter < num_input * 4; counter++)
-    {
-#pragma HLS LOOP_TRIPCOUNT min = size * 4 max = size * 4
+    //for (ap_uint<30> counter = 0; counter < num_input * 4; counter++)
+    ap_uint<30> counter = 0;
+
+    Symbol symbol;
+    Match match;
+    while(1){
 #pragma HLS pipeline II = 1
         // Blocking read command from inStream, concatenate with counter
         // and Blocking write command to outStream
-        UBYTE symbol = inStream.read();
-        Match match;
-        match.ridPlusOne = ap_uint<2>(automata(symbol));
-        match.pos = counter;
-        outStream << match;
+        bool valid = inStream.read_nb(symbol);
+	
+	if(valid){
+		UBYTE input_symbol = symbol.symbol;
+        
+		match.last = (symbol.last == 1);
+        	match.ridPlusOne = automata(input_symbol);
+        	match.pos = counter;
+        	
+		outStream << match;
+		counter += 1;
+	}
     }
 }
 
 // Read result from outStream and write the result to Global Memory
-static void write_result(Match *out, hls::stream<Match> &outStream, int num_input)
+static void write_result(Match *out, hls::stream<Match> &outStream)
 {
 // Auto-pipeline is going to apply pipeline to this loop
-mem_wr:
     int next_index = 0;
+    Match packet;
 
-    for (int i = 0; i < num_input * 4; i++)
-    {
-#pragma HLS LOOP_TRIPCOUNT min = size * 4 max = size * 4
+    //for (int i = 0; i < num_input * 4; i++)
+    while(1){
 #pragma HLS pipeline II = 1
         // Blocking read command to inStream
-        Match packet = outStream.read();
+        bool valid = outStream.read_nb(packet);
 
-        // // If we have a report bit
-        if ((packet.ridPlusOne & 0x3) != 0)
-        {
-            //printf("!Found something interesting at %d, writing out\n", packet.pos.to_int());
-            out[next_index++] = packet;
-        }
-	
+	if(valid){
+        	// // If we have a report bit
+        	if (packet.ridPlusOne){
+            		//printf("!Found something interesting at %d, writing out\n", packet.pos.to_int());
+            		out[next_index++] = packet;
+        	}
+
+		if(packet.last){
+			//printf("Got the last packet!; returning");
+			return;
+		}
+	}
     }
 }
 
@@ -94,19 +105,18 @@ extern "C"
     */
     void krnl_automata(Input *in, Match *out, int num_input)
     {
-        static hls::stream<UBYTE> inStream("input_stream");
-        static hls::stream<Match> outStream("output_stream");
+#pragma HLS INTERFACE mode = m_axi depth = 1024 port = in bundle = gmem0
+#pragma HLS INTERFACE mode = m_axi depth = 1024 port = out bundle = gmem1
+#pragma HLS INTERFACE ap_ctrl_chain port = return
 
-#pragma HLS INTERFACE m_axi depth = 1<<22 port = in offset = slave
-#pragma HLS INTERFACE m_axi depth = 1<<22 port = out offset = slave
-// #pragma HLS INTERFACE s_axilite depth = 1 port = num_input bundle = CTRL
-// #pragma HLS aggregate variable=out compact=bit
+hls_thread_local hls::stream<Symbol, 16> inStream("input_stream");
+hls_thread_local hls::stream<Match, 16> outStream("output_stream");
 
 #pragma HLS dataflow
 
         // dataflow pragma instruct compiler to run following three APIs in parallel
         read_input(in, inStream, num_input);
-        compute_automata(inStream, outStream, num_input);
-        write_result(out, outStream, num_input);
+        hls_thread_local hls::task t1(compute_automata, inStream, outStream);
+        write_result(out, outStream);
     }
 }

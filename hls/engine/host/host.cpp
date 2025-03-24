@@ -53,8 +53,8 @@ int main(int argc, char **argv)
     std::string input_filename = argv[2];
 
     // For now, lets set the input size to 2MB
-    size_t input_buffer_size = 1 << 22; // For now, lets do chunks of 2MB each
-    char *in_buffer = new char[input_buffer_size]();
+    size_t input_buffer_size = 1 << 24; // For now, lets do chunks of 2MB each
+    //char *in_buffer = new char[input_buffer_size]();
 
     // This servers as a host-side match buffer for multiple kernel calls
     std::vector<Match> results;
@@ -68,14 +68,21 @@ int main(int argc, char **argv)
     file.seekg(0, std::ios::beg);
     std::cout << "Input filename: " << input_filename << ", file size: " << fsize << std::endl;
 
+    // For now, lets just read it all into host DRAM
+    char *in_buffer = new char[fsize];
+    file.read(in_buffer, fsize);
+    file.close();
+
+    // Cast the data into Input data
+    Input *input = reinterpret_cast<Input*>(in_buffer);
+    Match *output = new Match[fsize]();
+    
     // Use offset to compute location of matches
     int offset = 0; 
 
     // Number of loops is the number of kernel calls
-    int loops = (fsize % input_buffer_size == 0) ? (fsize / input_buffer_size) : (1 + (fsize / input_buffer_size));
-
-    // Don't know if the input size will be a multiple of input_buffer, so extras
     int last_chunk = fsize % input_buffer_size;
+    int loops = (last_chunk == 0) ? (fsize / input_buffer_size) : (1 + (fsize / input_buffer_size));
 
     // Load the kernel and instantiate input and output buffers
     xrt::kernel krnl = xrt::kernel(device, uuid, "krnl_automata");
@@ -97,28 +104,24 @@ int main(int argc, char **argv)
     std::cout << "Time to start the clock" << std::endl;
 
     // Start the clock
-    std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
-
+    //std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
+    std::chrono::high_resolution_clock::time_point start_time, end_time;
+    start_time = std::chrono::high_resolution_clock::now();
     // TODO, set this to the correct number of iterations; it may be loops or loops + 1
     for(int i = 0; i < loops; i++){
 
 	    // Grab the input buffer size
-	    int loop_input_size = (i < loops) ? input_buffer_size : last_chunk;
-	    int output_buffer_size = loop_input_size;
-	    printf("Reading in %d bytes of the file\n", loop_input_size);
+	    int loop_input_size = (i < (loops - 1)) ? input_buffer_size : last_chunk;
+	    if(last_chunk == 0){
+		    break;
+	    }
 
-	    // Read the chunk size from the file; this might not be very efficient
-	    file.read(in_buffer, loop_input_size);
-
-	    // Cast the byte array to an Input array; may be inefficient
-	    Input *input = reinterpret_cast<Input*>(in_buffer);
-
-	    // Instantiate a new output buffer; may be inefficient
-	    Match *output = new Match[output_buffer_size]();
+	    std::cout << "Loop " << i+1 << " of " << loops << ", Reading in " << loop_input_size << " bytes" << std::endl;
 
 	    // memcpy into the maps
-	    std::memcpy(bo_in_map, input, loop_input_size);
-	    std::memcpy(bo_out_map, output, loop_input_size);
+	    std::cout << "memcpy from " << offset << " size " << loop_input_size << std::endl;
+	    std::memcpy(bo_in_map, input + offset, loop_input_size);
+	    std::memcpy(bo_out_map, output + offset, loop_input_size);
 
 	    // Compute the number of Inputs
 	    size_t input_size = loop_input_size / 4;
@@ -126,18 +129,21 @@ int main(int argc, char **argv)
 	    // Send input and output to FPGA
 	    bo_in.sync(XCL_BO_SYNC_BO_TO_DEVICE);
 	    // Run Kernel
+	    //start_time = std::chrono::high_resolution_clock::now();
 	    auto run = krnl(bo_in, bo_out, input_size);
 	    // Wait on response
 	    run.wait();
+	    //end_time = std::chrono::high_resolution_clock::now();
 	    // Send results back
 	    bo_out.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
 
 	   // Copy the results to results vector
 	   int j = 0;
 	   while(true){
-		Match out = output[j];
+		Match out = bo_out_map[j];
 		int pos = out.pos.to_int();
 		int ridPlusOne = out.ridPlusOne.to_int();
+		std::cout << "Match pos:" << pos << " ridPlusOne:" << ridPlusOne << std::endl;
 		if(ridPlusOne != 0){
 			out.pos += offset;
 			results.push_back(out);
@@ -148,9 +154,13 @@ int main(int argc, char **argv)
 		j += 1;
 	   }
 	   offset += loop_input_size;
-	   delete output;
     }
-    std::chrono::high_resolution_clock::time_point end_time = std::chrono::high_resolution_clock::now();
+    std::cout << "DONE! Grabbing clock" << std::endl;
+    end_time = std::chrono::high_resolution_clock::now();
+    std::cout << "Done Grabbing clock" << std::endl;
+    delete output;
+    delete in_buffer;
+    std::cout << "Done clearning memory" << std::endl;
 
 
     double duration = std::chrono::duration<double, std::milli>(end_time - start_time).count();
@@ -158,6 +168,7 @@ int main(int argc, char **argv)
     std::cout << "Automata Processing Time: " << duration << " ms" << std::endl
               << std::flush;
     std::cout << "Throughput: " << (offset / 1000) / (duration) << " MB/s" << std::endl;
+    std::cout << "Got " << results.size() << " matches" << std::endl;
 
     for (int i = 0; i < results.size(); i++)
     {

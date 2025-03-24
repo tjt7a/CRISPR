@@ -95,29 +95,6 @@ int main()
     printf("%d: rid+1:%d pos:%d\n", i, ridPlusOne, pos);
   }
 
-  // // Print out matches
-  // for (int i = 0; i < output_size; i++)
-  // {
-  //   // We only have 2 bits for reporting
-  //   int report_bits = (out[i] & 0x3);
-  //   // The rest is index
-  //   int index = (out[i] >> 2);
-  //   if (report_bits != 0)
-  //     std::cout << "MATCH " << index << " || " << report_bits << std::endl;
-  // }
-
-  // // Make sure matches match expectation
-  // for (int i = 0; i < output_size; i++)
-  // {
-  //   int expected = res[i];
-  //   int result = out[i] & 0x3;
-  //   if (expected != result)
-  //   {
-  //     std::cout << "MISMATCH exp:" << expected << ", res:" << result << std::endl;
-  //     return EXIT_FAILURE;
-  //   }
-  // }
-
   std::cout << "Test passed.\n";
   return EXIT_SUCCESS;
 }

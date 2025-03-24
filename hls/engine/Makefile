@@ -44,7 +44,7 @@ cleanall: clean
 # kernel rules
 $(AUTOMATA_XO): krnl_automata.cpp automata_single_file.cpp automata_tree.cpp 
 	$(RM) $@
-	$(VPP) $(VPP_OPTS) -c --hls.clock 550000000:krnl_automata -k krnl_automata -I'$(<D)' -o $@ $+
+	$(VPP) $(VPP_OPTS) -c --hls.clock 600000000:krnl_automata -k krnl_automata -I'$(<D)' -o $@ $+
 
 $(XCLBIN): $(AUTOMATA_XO)
 	$(VPP) $(VPP_OPTS) -l -o $@ $(AUTOMATA_XO) $+ #$(VPP_LINK_OPTS)

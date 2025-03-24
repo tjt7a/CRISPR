@@ -22,21 +22,28 @@
 #include <ap_int.h>
 #include <hls_stream.h>
 #include "automata.hpp"
+#include "hls_task.h"
 
 const int size = 1000;
 
-typedef ap_uint<2> U2BIT; // 2-bit generic
-typedef ap_uint<30> U24BIT; // 30-bit generic
+typedef ap_uint<1> U1BIT; // 2-bit generic
+typedef ap_uint<30> U30BIT; // 30-bit generic
 typedef uint8_t UBYTE;  // a byte
 
 struct Input {
 	UBYTE symbols[4]; // Array of 4 8-bit symbols
 };
 
+struct Symbol {
+	UBYTE symbol;
+	UBYTE last;
+};
+
 // We want to keep this to a power of 2
 struct Match {
-	U2BIT ridPlusOne; // MATCH STATE ID + 1; 0 means invalid
-	U24BIT pos;		//  Detection position up to 1 billion
+	U1BIT ridPlusOne; // MATCH STATE ID + 1; 0 means invalid
+	U1BIT last;
+	U30BIT pos;		//  Detection position up to 1 billion
 };
 
 extern "C" {
